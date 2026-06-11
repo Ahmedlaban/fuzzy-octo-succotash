@@ -1,4 +1,1 @@
 node_modules
-git add .
-git commit -m "Upload source code"
-git push -u origin master
