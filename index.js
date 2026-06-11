@@ -1,10 +1,11 @@
 const { Telegraf } = require('telegraf');
 const axios = require('axios');
+const http = require('http');
 
 // التوكن الخاص بك
 const bot = new Telegraf('8707360184:AAHMsSRSFOtz8Qpx_zorsGXba1shCkHOG3Y');
 
-// استخدام رابط متغير (إما من السحابة أو الرابط المحلي الافتراضي)
+// استخدام رابط الـ API من متغيرات البيئة (Render)، وإذا لم يوجد نستخدم رابطاً افتراضياً
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
 bot.start((ctx) => ctx.reply('مرحباً بك! أنا بوت الحجز. كيف يمكنني مساعدتك اليوم؟'));
@@ -23,14 +24,22 @@ bot.command('book', async (ctx) => {
     };
 
     try {
-        // نستخدم المتغير API_URL الذي عرفناه في الأعلى
         await axios.post(`${API_URL}/api/book`, bookingData);
         ctx.reply('تم حجز موعدك بنجاح! سيظهر في لوحة التحكم قريباً.');
     } catch (e) {
-        console.error('Error details:', e.message); // لمساعدتنا في معرفة الخطأ بالضبط
+        console.error('Error details:', e.message);
         ctx.reply('حدث خطأ أثناء الحجز، تأكد أن السيرفر يعمل.');
     }
 });
 
+// هذا الجزء هو المسؤول عن فتح المنفذ الذي يطلبه Render
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+    res.writeHead(200);
+    res.end('Bot is running');
+}).listen(PORT, () => {
+    console.log(`✅ السيرفر يعمل على المنفذ: ${PORT}`);
+});
+
 bot.launch();
-console.log(`✅ البوت يعمل الآن! ويتصل بـ: ${API_URL}`);
+console.log('✅ البوت يعمل الآن ويتصل بـ تيليجرام');
